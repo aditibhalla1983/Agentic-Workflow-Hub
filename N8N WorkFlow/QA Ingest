@@ -1,0 +1,374 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "QA Submission Form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name"
+            },
+            {
+              "fieldLabel": "Email"
+            },
+            {
+              "fieldLabel": "Question"
+            },
+            {
+              "fieldLabel": "Answer",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ac338ea6-6c5b-440b-ab0b-b09dce80791e",
+      "name": "On form submission",
+      "webhookId": "c07cfcb2-f373-49e6-9f8e-a6c5b318b52b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "899e2e2f-12c3-4474-9cb8-04608d1d8a35",
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": "n8n",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "68d6afb5-524a-48d4-b004-42bfb6a430b6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "acea3612-e2e5-477c-bee8-206b5bdabece",
+              "name": "istrusted",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        -96
+      ],
+      "id": "d926f45c-6e19-4539-ad7a-915b9af0ddc9",
+      "name": "IsTrusted:True"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "acea3612-e2e5-477c-bee8-206b5bdabece",
+              "name": "istrusted",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        80
+      ],
+      "id": "8dcf736c-c9ae-4081-98b7-6ede9af3d060",
+      "name": "IsTrusted:false"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        688,
+        0
+      ],
+      "id": "1cb74e11-181d-46b1-b59a-9f959a05d0a3",
+      "name": "ref"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        160
+      ],
+      "id": "85664dab-b4e3-4dc8-8d0a-ae37c5c41296",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following questions and answer and output relevant tags \n\nQuestion : {{ $json.Question }}\n\nAnswer: {{ $json.Answer }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a content tagging expert. Your task is to analyse questions and answer submission and generate relevant descriptive tags that categorize the content based on the topic, key concepts and technical terms . Always provide 4-5 tags as a comma seperated list . Keep tags short and focused in individual length.\n\nExample Output : \npartner , partnership, agency , external contractors , lead referral "
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        912,
+        0
+      ],
+      "id": "7fbf8602-3b71-451d-bab6-74f24473b899",
+      "name": "Add Tags"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "WRmLHBMwMUjvcO5A",
+          "mode": "list",
+          "cachedResultName": "Q&A",
+          "cachedResultUrl": "/projects/izGPvW55BMDJPTfU/datatables/WRmLHBMwMUjvcO5A"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "isTrusted": "={{ $('ref').item.json.istrusted }}",
+            "Tags": "={{ $json.text }}",
+            "Name": "={{ $('ref').item.json.Name }}",
+            "Email": "={{ $('ref').item.json.Email }}",
+            "Question": "={{ $('ref').item.json.Question }}",
+            "Answer": "={{ $('ref').item.json.Answer }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Question",
+              "displayName": "Question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Answer",
+              "displayName": "Answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "isTrusted",
+              "displayName": "isTrusted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1280,
+        0
+      ],
+      "id": "4cbf96a6-72e2-40f0-96e1-849dc9d3300e",
+      "name": "Insert row"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "IsTrusted:True",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IsTrusted:false",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsTrusted:True": {
+      "main": [
+        [
+          {
+            "node": "ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsTrusted:false": {
+      "main": [
+        [
+          {
+            "node": "ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ref": {
+      "main": [
+        [
+          {
+            "node": "Add Tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Add Tags",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Tags": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "On form submission": [
+      {
+        "Name": "Aditi",
+        "Email": "aditi.amitbhalla@gmail.com",
+        "Question": "Whats ur nick name",
+        "Answer": "Ritu is my nick name",
+        "submittedAt": "2026-10-23T11:39:05.219-05:00",
+        "formMode": "test"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b39529f7bfe08a557cbbcc3a4e3f9962345006fef652db832cd3e5ce1edc6ce7"
+  }
+}
