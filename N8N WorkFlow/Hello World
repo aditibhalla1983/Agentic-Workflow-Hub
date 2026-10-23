@@ -1,0 +1,46 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7d773801-1225-4325-9913-82d41b768fbb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "return [{ \"message\": \"Hello World!\" }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "007193b6-587b-4ed0-a942-fef1d418bd6c",
+      "name": "Code in Python"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "b39529f7bfe08a557cbbcc3a4e3f9962345006fef652db832cd3e5ce1edc6ce7"
+  }
+}
